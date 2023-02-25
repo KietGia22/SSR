@@ -34,31 +34,31 @@ app.use(csrfProtection);
 app.use(flash());
 
 app.use((req, res, next) => {
-    if(!req.session.user){
-        return next(); 
-    }
-    User.findById(req.session.user._id)
-       .then(user => {
-           req.user = user;
-           next();
-       })
-       .catch(err => console.log(err));
-});
+    res.locals.isAuthenticated = req.session.isLoggedIn;
+    res.locals.csrfToken = req.csrfToken();
+    next();
+})
 
 app.use((req, res, next) => {
-    if (!req.session.user) {
-      return next();
+    if(!req.session.user){
+        return next(); 
     }
     User.findById(req.session.user._id)
     //I can simply store that user in my request and keep in mind
     //this is a full mongoose model so we can call all these mongoose model functions 
     //or methods on that user object and therefore also on the user object which I do store here
-      .then(user => {
-        req.user = user;
-        next();
-      })
-      .catch(err => console.log(err));
-  });
+       .then(user => {
+        if(!user){
+            return next();
+        }
+           req.user = user;
+           next();
+       })
+       .catch(err => {
+        // throw new Error(err);
+        next(new Error(err));
+       });
+});
 
 app.use((req, res, next) => {
     res.locals.isAuthenticated = req.session.isLoggedIn;
@@ -70,8 +70,21 @@ app.use('/admin', adminRoutes);
 app.use(shopRoutes);
 app.use(authRoutes);
 
+app.get('/500', errorController.get500)
+
 app.use(errorController.get404);
 
+app.use((error, req, res, next) => {
+    // res.render('500');
+    //res.status(error.httpStatusCode).render(...);
+    // res.redirect('/500');
+    res.status(404).render('500', {
+        pageTitle: 'Error Occured!',
+        path: '/500',
+        isAuthenticated: req.session.isLoggedIn
+      });
+});
+ 
 mongoose
     .connect(MONGDB_URI)
     .then((result) => {

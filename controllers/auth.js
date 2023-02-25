@@ -1,17 +1,18 @@
-const crypto = require('crypto');
-
 const bcrypt = require('bcryptjs');
 const User = require('../models/user');
-const nodemailer = require('nodemailer');
-const sendgridTransport = require('nodemailer-sendgrid-transport');
+const {validationResult} = require('express-validator/check');
 
-const transporter = nodemailer.createTransport(
-    sendgridTransport({
-        auth: {
-            api_key: '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',
-        },
-    }),
-);
+// const crypto = require('crypto');
+// const nodemailer = require('nodemailer');
+// const sendgridTransport = require('nodemailer-sendgrid-transport');
+
+// const transporter = nodemailer.createTransport(
+//     sendgridTransport({
+//         auth: {
+//             api_key: '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',
+//         },
+//     }),
+// );
 
 exports.getLogin = (req, res, next) => {
     // const isLoggedIn = req.get('Cookie').split(';')[0].trim().split('=')[1] === 'true';
@@ -77,8 +78,18 @@ exports.postSignup = (req, res, next) => {
     const email = req.body.email;
     const password = req.body.password;
     const confirmPassword = req.body.confirmPassword;
+    const errors = validationResult(req);
+    if(!errors.isEmpty()) {
+        console.log(errors.array());
+        //render: render the page again
+        return res.status(422).render('auth/signup', {
+            path: '/signup',
+            pageTitle: 'Signup',
+            errorMessage: errors.array()[0].msg
+        });
+    }
     User.findOne({ email: email })
-        .then((userDoc) => {
+        .then((userDoc) => {  
             if (userDoc) {
                 req.flash('error', 'Email exists already, please pick a different one');
                 return res.redirect('/signup');

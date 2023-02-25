@@ -1,0 +1,12 @@
+return User.findOne() ... in routes/auth.js
+
+What will this do?
+the express validator package will check for a custom validator to return true or false, to return a throw error or to return a promise
+If it's a promise as it is the case with this because here we ultimately return a promise beacuse every then block implicitly return a new promise
+so if we return a promise then express validator will wait for this promise to be fulfilled and if it fulfilled with in our case nothing so basically no error
+then it treats this validdation as successful. If it resolves with some rejection in the end which will happen if we make it into this if block, then express validator will detect this rejectiona and will store this as an error 
+
+
+bcrypt.hash(password, 12) in controllers/auth.js
+now what I do have here is I instantly start with hash in my oassword and so on creating that user because I can rely on the user to not exist already inside of my controllers
+beacuse I do check for its existence ahead of time in my auth.js route with a help of that validation middleware

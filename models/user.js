@@ -25,7 +25,8 @@ const userSchema = new Schema({
           ref: 'Product',
           required: true
         },
-        quantity: { type: Number, required: true }
+        quantity: { type: Number, required: true },
+        price: {type: Number, required: true}
       }
     ]
   }
@@ -37,14 +38,21 @@ userSchema.methods.addToCart = function(product) {
   });
   let newQuantity = 1;
   const updatedCartItems = [...this.cart.items];
+  let total = product.price;
+  let sum = 0;
+  sum += total;
 
   if (cartProductIndex >= 0) {
     newQuantity = this.cart.items[cartProductIndex].quantity + 1;
     updatedCartItems[cartProductIndex].quantity = newQuantity;
+    
+    total = this.cart.items[cartProductIndex].price + +total;
+    updatedCartItems[cartProductIndex].price = total;
   } else {
     updatedCartItems.push({
       productId: product._id,
-      quantity: newQuantity
+      quantity: newQuantity,
+      price: total
     });
   }
   const updatedCart = {

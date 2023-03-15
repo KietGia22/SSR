@@ -4,9 +4,9 @@ const { check, body } = require('express-validator/check');
 
 const authController = require('../controllers/auth');
 
-const User = require('../models/user');
+const User = require('../models/user')
 
-const router = express.Router();
+const router = express.Router()
 
 router.get('/login', authController.getLogin);
 
